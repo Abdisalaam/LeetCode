@@ -3,16 +3,150 @@
 using System.ComponentModel;
 using System.Text;
 
-int[] s = [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0];
-int result = Solution.LongestOnes(s , 2);
+int[] s = [1, 2, 2, 1, 1, 3];
+var result = Solution.UniqueOccurrences(s);
 //Console.WriteLine(result);
 Console.WriteLine(string.Join(", ", result));
 public class Solution
 {
+    public static bool UniqueOccurrences(int[] arr)
+    {        
+        HashSet<int> nums1Set = [];
+        Dictionary<int, int> numberOccurrences = [];
+        foreach (var number in arr)
+        {
+            if (!numberOccurrences.TryAdd(number,1))
+            {
+                numberOccurrences[number]++;
+            }
+        }
+        foreach (var item in numberOccurrences.Values)
+        {
+            if (!nums1Set.Add(item))
+            {
+                return false;
+            }           
+        }
+        return true;
+    }
+    public static int[] RunningSum(int[] nums)
+    {
+        int[] result = new int[nums.Length];
+        result[0] = nums[0];
+        for (int i = 1; i < nums.Length; i++)
+        {
+            result[i] = result[i - 1] + nums[i];
+        }
+        return result;
+    }
+    public static IList<IList<int>> FindDifference(int[] nums1, int[] nums2)
+    {
+        HashSet<int> nums1Set = [.. nums1];
+        HashSet<int> nums2Set = [.. nums2];
+        HashSet<int> only1 = [.. nums1Set];
+        HashSet<int> only2 = [.. nums2Set];
+        only1.ExceptWith(nums2Set);
+        only2.ExceptWith(nums1Set);
+        return [[.. only1], [.. only2]];
+    }
+
+    public static IList<IList<int>> FindDifferenceV1(int[] nums1, int[] nums2)
+    {
+        IList<IList<int>> ints = new List<IList<int>>();       
+        HashSet<int> nums1Set = new HashSet<int>(nums1);
+        HashSet<int> nums2Set = new HashSet<int>(nums2);
+         List<int> ints1 = new List<int>();
+         List<int> ints2 = new List<int>();
+        int count = nums1Set.Count;
+        for (int i = 0; i < nums1Set.Count; i++)
+        {
+            if (!nums2Set.Contains(nums1Set.ElementAt(i)))
+            {
+                ints1.Add(nums1Set.ElementAt(i));
+            }
+        }
+        for (int i = 0; i < nums2Set.Count; i++)
+        {
+            if (!nums1Set.Contains(nums2Set.ElementAt(i)))
+            {
+                ints2.Add(nums1Set.ElementAt(i));
+            }
+        }
+        ints.Add(ints1); ;
+        ints.Add(ints2);
+        return ints;
+    }
+    public static int PivotIndex(int[] nums)
+    {
+        int result = -1;
+        int totalSum = nums.Sum();
+        int leftSum = 0;
+        int rightSum = 0;
+        for(int i = 0; i < nums.Length; i++)
+        {
+            rightSum = totalSum - leftSum - nums[i];
+            if (leftSum == rightSum)
+            {
+                return i;                
+            }
+            leftSum += nums[i];
+        }
+        return result;
+    }
+    public static int LargestAltitude(int[] gain)
+    {
+        int largestAltitude = 0;
+        int currentAltitude = 0;
+        Dictionary<int, int> keyValuePairs = new Dictionary<int, int>();
+
+        for (int i = 0; i < gain.Length; i++)
+        {            
+            currentAltitude +=  gain[i];
+            largestAltitude = Math.Max(largestAltitude, currentAltitude);
+        }
+        return largestAltitude;
+
+    }
+    public static int LongestSubarray(int[] nums)
+    {
+        int j = 0;
+        int zeroes = 0;
+        int maxlength = 0;
+        for (int i = 0; i < nums.Length; i++)
+        {
+            zeroes += nums[i] ^ 1;
+            while (zeroes > 1)
+            {
+                zeroes -= nums[j] ^ 1;
+                j++;
+            }
+            maxlength = Math.Max(maxlength,i - j);
+        }
+        return maxlength;
+
+    }
     public static int LongestOnes(int[] nums, int k)
     {
-        int result = 0;
-        return result;
+        int j = 0;
+        int countOfzeros = 0;
+        int longestOnesLength = 0;
+        for (int i = 0; i < nums.Length; i++)
+        {
+            if (nums[i] == 0)
+            {
+                countOfzeros++;
+            }
+            while(k < countOfzeros)
+            {
+                if(nums[j] == 0)
+                {
+                    countOfzeros--;
+                }
+                j++;
+            }
+            longestOnesLength = Math.Max(longestOnesLength, i - j + 1);
+        }
+        return longestOnesLength;
     }
     public static int MaxVowels(string s, int k)
     {
