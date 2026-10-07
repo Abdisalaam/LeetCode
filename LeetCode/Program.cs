@@ -3,12 +3,41 @@
 using System.ComponentModel;
 using System.Text;
 
-int[] s = [1, 2, 2, 1, 1, 3];
-var result = Solution.UniqueOccurrences(s);
+string word1 = "cabbbaaa", word2 = "abbbbccc";
+var result = Solution.CloseStrings(word1, word2);
 //Console.WriteLine(result);
 Console.WriteLine(string.Join(", ", result));
 public class Solution
 {
+    public static bool CloseStrings(string word1, string word2)
+    {        
+        if (word1.Length != word2.Length)
+        {
+            return false;
+        }
+        HashSet<char> word1Set = [.. word1];
+        HashSet<char> word2Set = [.. word2];
+        Dictionary<char, int> word1frequency = [];
+        Dictionary<char, int> word2frequency = [];
+
+       for (int i = 0; i < word1.Length; i++)
+        {
+            if (!word1frequency.TryAdd(word1[i], 1))
+            {
+                word1frequency[word1[i]]++;
+            } 
+            if (!word2frequency.TryAdd(word2[i], 1))
+            {
+                word2frequency[word2[i]]++;
+            }
+        }      
+
+        var f1 = word1frequency.Values.OrderBy(x => x).ToList();
+        var f2 = word2frequency.Values.OrderBy(x => x).ToList();
+
+        return f1.SequenceEqual(f2);
+       // return true;
+    }
     public static bool UniqueOccurrences(int[] arr)
     {        
         HashSet<int> nums1Set = [];
@@ -39,7 +68,7 @@ public class Solution
         }
         return result;
     }
-    public static IList<IList<int>> FindDifference(int[] nums1, int[] nums2)
+    public static IList<IList<int>> FindDifferenceV2(int[] nums1, int[] nums2)
     {
         HashSet<int> nums1Set = [.. nums1];
         HashSet<int> nums2Set = [.. nums2];
