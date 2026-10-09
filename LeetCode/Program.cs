@@ -1,14 +1,133 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using System.Text;
 
-using System.ComponentModel;
-using System.Text;
-
-string word1 = "cabbbaaa", word2 = "abbbbccc";
-var result = Solution.CloseStrings(word1, word2);
+string s = "3[a12[cb]]";
+var result = Solution.DecodeString(s);
 //Console.WriteLine(result);
 Console.WriteLine(string.Join(", ", result));
 public class Solution
 {
+    public static string DecodeString(string s)
+    {
+       Stack<string> stackSubString = new Stack<string>();
+        Stack<int> stackNumber = new Stack<int>();
+        int number = 0;
+        StringBuilder currentSting = new StringBuilder();
+
+        foreach (char c in s)
+        {
+            if (char.IsDigit(c))
+            {
+                number = number * 10 + (c - '0');
+            }
+            else if (c == '[')
+            {
+                stackNumber.Push(number);
+                stackSubString.Push(currentSting.ToString());
+
+                number = 0;
+                currentSting.Clear();
+            }
+            else if (c == ']')
+            {
+                int storedNumber = stackNumber.Pop();
+                StringBuilder storedLetter = new StringBuilder(stackSubString.Pop());
+                string temp = storedLetter.ToString();
+                for (int i = 0; i < storedNumber; i++)
+                {
+                    storedLetter.Append(currentSting);
+                }
+                currentSting = storedLetter;
+            }
+            else
+            {
+                currentSting.Append(c);
+            }
+        }
+        return currentSting.ToString();
+    }
+
+    public static int[] AsteroidCollision(int[] asteroids)
+    {       
+        Stack<int> stack = new Stack<int>();       
+        for (int i = 0; i < asteroids.Length; i++)
+        {
+            if (asteroids[i] > 0)
+            {
+                stack.Push(asteroids[i]);
+            }
+            else
+            {
+                while (stack.Count > 0 && stack.Peek() > 0 && stack.Peek() < Math.Abs(asteroids[i]))
+                {
+                    stack.Pop();
+                }
+                if (stack.Count == 0 || stack.Peek() < 0)
+                {
+                    stack.Push(asteroids[i]);
+                }
+                else if (stack.Peek() == Math.Abs(asteroids[i]))
+                {
+                    stack.Pop();
+                }
+            }
+        }
+        int[] result = stack.ToArray();
+        Array.Reverse(result);
+        return result;
+    }
+    public static string RemoveStars(string s)
+    {
+        if (!s.Contains('*'))
+        {
+            return s;
+        }
+        string result = "";
+        Stack<char> stack = new Stack<char>();
+        for (int i = 0; i < s.Length; i++)
+        {
+            if (s[i] == '*')
+            {
+                if (stack.Count > 0)
+                {
+                    stack.Pop();
+                }
+            }
+            else
+            {
+                stack.Push(s[i]);
+            }
+        }
+        var chars = stack.ToArray();
+
+        Array.Reverse(chars);
+        result = new string(chars);
+        return result;
+    }
+    public static int EqualPairs(int[][] grid)
+    {        
+        int count = 0;
+        for (int row = 0; row < grid.Length; row++)
+        {
+            for (int col = 0; col < grid.Length; col++)
+            {
+                bool isEqual = true;
+                for (int j = 0; j < grid.Length; j++)
+                {
+                    
+                    if (grid[row][j] != grid[j][col])
+                    {
+                        isEqual = false;
+                        break;
+                    }
+                }
+                if (isEqual)
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
     public static bool CloseStrings(string word1, string word2)
     {        
         if (word1.Length != word2.Length)
@@ -17,6 +136,10 @@ public class Solution
         }
         HashSet<char> word1Set = [.. word1];
         HashSet<char> word2Set = [.. word2];
+        if (!word1Set.SetEquals(word2Set))
+        {
+            return false;
+        }
         Dictionary<char, int> word1frequency = [];
         Dictionary<char, int> word2frequency = [];
 
@@ -30,13 +153,12 @@ public class Solution
             {
                 word2frequency[word2[i]]++;
             }
-        }      
-
+        }       
         var f1 = word1frequency.Values.OrderBy(x => x).ToList();
         var f2 = word2frequency.Values.OrderBy(x => x).ToList();
 
         return f1.SequenceEqual(f2);
-       // return true;
+       
     }
     public static bool UniqueOccurrences(int[] arr)
     {        
