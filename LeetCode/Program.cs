@@ -1,11 +1,45 @@
-﻿using System.Text;
+﻿using System.Diagnostics.Tracing;
+using System.Text;
 
-string s = "3[a12[cb]]";
-var result = Solution.DecodeString(s);
+//var result = Solution.DecodeString(s);
+RecentCounter recentCounter = new RecentCounter();
 //Console.WriteLine(result);
-Console.WriteLine(string.Join(", ", result));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(300)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(300)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(300)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(400)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(3300)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(6000)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(5000)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(5000)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(50)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(500)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(500)));
+Console.WriteLine(string.Join(", ", recentCounter.Ping(50)));
+
+public class RecentCounter
+{
+    private Queue<int> q;
+    public RecentCounter()
+    {
+        q = new Queue<int>();
+    }
+    public int Ping(int t)
+    {
+        q.Enqueue(t);
+        while (q.Count > 0 && q.Peek() < t - 3000)
+        {
+            q.Dequeue();
+        }
+        return q.Count;
+    }
+}
+
 public class Solution
 {
+   
+
+   
     public static string DecodeString(string s)
     {
        Stack<string> stackSubString = new Stack<string>();
@@ -707,16 +741,11 @@ public class Solution
 
     }
 }
-public class ListNode
+public class ListNode(int val = 0, ListNode? next = null)
 {
-    public int val;
-    public ListNode next;
+    public int val = val;
+    public ListNode next = next;
 
-    public ListNode(int val = 0, ListNode next = null)
-    {
-        this.val = val;
-        this.next = next;
-    }
     public static ListNode BuildList(int[] digits)
     {
         ListNode dummy = new ListNode(0);
