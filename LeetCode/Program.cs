@@ -1,21 +1,20 @@
 ﻿using System.Diagnostics.Tracing;
+using System.Reflection;
 using System.Text;
 
-//var result = Solution.DecodeString(s);
-RecentCounter recentCounter = new RecentCounter();
+
+//var result = Solution.PredictPartyVictory();
+//RecentCounter recentCounter = new RecentCounter();
 //Console.WriteLine(result);
-Console.WriteLine(string.Join(", ", recentCounter.Ping(300)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(300)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(300)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(400)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(3300)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(6000)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(5000)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(5000)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(50)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(500)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(500)));
-Console.WriteLine(string.Join(", ", recentCounter.Ping(50)));
+//ListNode listNode = new ListNode();
+object[] listOfnodes = { 3, 9, 20, null, null, 15, 7 };
+TreeNode root = TreeNode.BuildTree(listOfnodes);
+int result = TreeNode.MaxDepth(root);
+//TreeNode.PrintTree(root);
+//var result = listNode.PairSum(head);
+Console.WriteLine(result);
+
+//Console.WriteLine(string.Join(", ", treeNode));
 
 public class RecentCounter
 {
@@ -27,19 +26,209 @@ public class RecentCounter
     public int Ping(int t)
     {
         q.Enqueue(t);
-        while (q.Count > 0 && q.Peek() < t - 3000)
+        while (q.Peek() < t - 3000)
         {
             q.Dequeue();
         }
         return q.Count;
     }
 }
+public class ListNode(int val = 0, ListNode? next = null)
+{
+    public int val = val;
+    public ListNode next = next;
+    public static ListNode BuildList(int[] digits)
+    {
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+
+        foreach (int d in digits)
+        {
+            current.next = new ListNode(d);
+            current = current.next;
+        }
+
+        return dummy.next;
+    }
+    public void PrintList(ListNode head)
+    {
+        ListNode current = head;
+        while (current != null)
+        {
+            Console.Write(current.val);
+
+            if (current.next != null)
+                Console.Write(" -> ");
+
+            current = current.next;
+        }
+
+        Console.WriteLine();
+    }
+    public static ListNode AddTwoNumbers(ListNode l1, ListNode l2)
+    {
+        ListNode root = new ListNode(0);
+        ListNode result = root;
+
+        int leftover = 0;
+
+        while (l1 != null || l2 != null || leftover > 0)
+        {
+            int x = (l1 != null) ? l1.val : 0;
+            int y = (l2 != null) ? l2.val : 0;
+
+            int sum = x + y + leftover;
+
+            leftover = sum / 10;
+
+            result.next = new ListNode(sum % 10);
+            result = result.next;
+
+            if (l1 != null) l1 = l1.next;
+            if (l2 != null) l2 = l2.next;
+        }
+
+        return root.next;
+    }
+    public ListNode DeleteMiddle(ListNode head)
+    {      
+        int count = 0;
+        ListNode cureentNode = head;       
+        while(cureentNode != null)
+        {
+            count++;
+            cureentNode = cureentNode.next;
+        }
+        int toBeDeleted = count / 2;
+        ListNode updatedNodeList = new ListNode(0, head);
+        cureentNode = updatedNodeList;
+        for (int i = 0; i < toBeDeleted; i++)            
+        {
+            cureentNode = cureentNode.next;
+        }        
+        cureentNode.next = cureentNode.next.next;
+        return updatedNodeList.next;
+    }
+    public ListNode OddEvenList(ListNode head)
+    {
+        if (head == null || head.next == null)
+        {  return head; }
+            
+        ListNode oddNodes = head;
+        ListNode evenNodes = head.next;
+        ListNode evenHead = evenNodes;
+        while (evenNodes != null && evenNodes.next != null)
+        {
+            oddNodes.next = evenNodes.next;
+            oddNodes = oddNodes.next;
+
+            evenNodes.next = oddNodes.next;
+            evenNodes = evenNodes.next;
+
+        }
+        oddNodes.next = evenHead;
+       
+        return head;
+    }
+
+    public ListNode ReverseList(ListNode head)
+    {
+        if (head == null || head.next == null)
+        {
+            return head;
+        }
+        int n = 8;
+        for (int i = 0; i < n; i++)
+        {
+            int aa = i + (n / 2) - 1;
+        }
+        ListNode CurrentNode = head;
+        ListNode Backward = null;
+        while (CurrentNode != null)
+        {
+            ListNode Next = CurrentNode.next;
+            CurrentNode.next = Backward;
+            Backward = CurrentNode;
+            CurrentNode = Next;
+        }
+        return Backward;
+    }
+    public int PairSum(ListNode head)
+    {
+        if (head == null || head.next == null)
+        {
+            return 0;
+        }           
+        int maxSum = int.MinValue; 
+        ListNode slow = head;
+        ListNode fast = head;
+        ListNode prev = null;
+        while (fast != null && fast.next != null)
+        {
+            prev = slow;
+            slow = slow.next;
+            fast = fast.next.next;            
+        }
+        
+        prev.next = null;
+        ListNode secondHalf = slow;        
+        ListNode firstHalf = head;
+        prev = null;
+        while (secondHalf != null)
+        {
+            ListNode next = secondHalf.next;
+            secondHalf.next = prev;
+            prev = secondHalf;
+            secondHalf = next;
+        }
+        while (prev != null)
+        {
+            maxSum = Math.Max(maxSum, firstHalf.val + prev.val);
+            prev = prev.next;
+            firstHalf = firstHalf.next;
+        }
+        return maxSum;
+    }
+}
 
 public class Solution
 {
-   
+    TreeNode treeNode = new TreeNode();
 
-   
+    public static string PredictPartyVictory()
+    {
+        string senate = "DRRDDRRD";
+        Queue<int> Radiant = new Queue<int>();
+        Queue<int> Dire = new Queue<int>();
+        int n = senate.Length;
+        for (int i = 0; i < senate.Length; i++)
+        {
+            char c = senate[i];
+            if (c == 'R')
+            {
+                Radiant.Enqueue(i);
+            }
+            else
+            {
+                Dire.Enqueue(i);
+            }
+        }
+        while (Radiant.Count > 0 && Dire.Count > 0)
+        {
+            int r = Radiant.Dequeue();
+            int d = Dire.Dequeue();
+            if (r < d)
+            {
+                Radiant.Enqueue(r + n);
+            }
+            else
+            {
+                Dire.Enqueue(d + n);
+            }
+        }
+        return Radiant.Count > 0 ? "Radiant" : "Dire";
+       
+    }
     public static string DecodeString(string s)
     {
        Stack<string> stackSubString = new Stack<string>();
@@ -681,46 +870,7 @@ public class Solution
 
         return result.ToString();
     }
-    public static void PrintList(ListNode head)
-    {
-        ListNode current = head;
-        while (current != null)
-        {
-            Console.Write(current.val);
-
-            if (current.next != null)
-                Console.Write(" -> ");
-
-            current = current.next;
-        }
-
-        Console.WriteLine();
-    }
-    public static ListNode AddTwoNumbers(ListNode l1, ListNode l2)
-    {
-        ListNode root = new ListNode(0);
-        ListNode result = root;
-
-        int leftover = 0;
-
-        while (l1 != null || l2 != null || leftover > 0)
-        {
-            int x = (l1 != null) ? l1.val : 0;
-            int y = (l2 != null) ? l2.val : 0;
-
-            int sum = x + y + leftover;
-
-            leftover = sum / 10;
-
-            result.next = new ListNode(sum % 10);
-            result = result.next;
-
-            if (l1 != null) l1 = l1.next;
-            if (l2 != null) l2 = l2.next;
-        }
-
-        return root.next;
-    }
+   
     public static int[] TwoSum(int[] nums, int target)
     {
         var solution = new Dictionary<int, int>();
@@ -741,22 +891,114 @@ public class Solution
 
     }
 }
-public class ListNode(int val = 0, ListNode? next = null)
+
+public class TreeNode
 {
-    public int val = val;
-    public ListNode next = next;
-
-    public static ListNode BuildList(int[] digits)
+    public int val;
+    public TreeNode left;
+    public TreeNode right;
+    public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
     {
-        ListNode dummy = new ListNode(0);
-        ListNode current = dummy;
-
-        foreach (int d in digits)
+        this.val = val;
+        this.left = left;
+        this.right = right;
+    }
+    public static void PrintTree(TreeNode root)
+    {
+        if (root == null)
         {
-            current.next = new ListNode(d);
-            current = current.next;
+            Console.WriteLine("Empty tree");
+            return;
+        }
+        Queue<TreeNode> q = new Queue<TreeNode>();
+        q.Enqueue(root);
+
+        while (q.Count > 0)
+        {
+            TreeNode node = q.Dequeue();
+
+            if (node == null)
+            {
+                Console.Write("null ");
+                continue;
+            }
+            Console.Write(node.val + " ");
+            q.Enqueue(node.left);
+            q.Enqueue(node.right);
+        }
+        Console.WriteLine();
+    }
+    public static TreeNode BuildTree(object[] arr)
+    {
+        if (arr == null || arr.Length == 0)
+            return null;
+
+        TreeNode[] nodes = new TreeNode[arr.Length];
+
+        // Create nodes only for non-null values
+        for (int i = 0; i < arr.Length; i++)
+        {
+            if (arr[i] != null)
+                nodes[i] = new TreeNode((int)arr[i]);
         }
 
-        return dummy.next;
+        // Link children
+        for (int i = 0; i < arr.Length; i++)
+        {
+            if (nodes[i] == null)
+                continue;
+
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;            
+            if (left < arr.Length)
+            {
+                nodes[i].left = nodes[left];
+            } 
+            if (right < arr.Length)
+            {
+                nodes[i].right = nodes[right];
+            }                
+        }
+        return nodes[0];
     }
+
+    public static int MaxDepth(TreeNode root)
+    {
+        if (root == null)
+        {
+            return 0;
+        }
+        // preorder
+        int RootValue = root.val;
+        int leftDepth = MaxDepth(root.left);
+        int rightDepth = MaxDepth(root.right);
+        int maximial = Math.Max(leftDepth, rightDepth) + 1;
+        return maximial;
+    }
+    public static int MaxDepthIterativeVersion(TreeNode root)
+    {
+        if (root == null)
+        {
+            return 0;
+        }   
+        Queue<TreeNode> queue = new Queue<TreeNode>();
+        queue.Enqueue(root);
+        int depth = 0;
+
+        while (queue.Count > 0)
+        {
+            int levelSize = queue.Count;
+            depth++;
+
+            for (int i = 0; i < levelSize; i++)
+            {
+                TreeNode node = queue.Dequeue();
+                if (node.left != null) queue.Enqueue(node.left);
+                if (node.right != null) queue.Enqueue(node.right);
+            }
+        }
+
+        return depth;
+    }
+
 }
