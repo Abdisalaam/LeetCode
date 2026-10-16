@@ -3,18 +3,496 @@ using System.Reflection;
 using System.Text;
 
 
-//var result = Solution.PredictPartyVictory();
+//var result = Solution.AsteroidCollision();
 //RecentCounter recentCounter = new RecentCounter();
 //Console.WriteLine(result);
 //ListNode listNode = new ListNode();
-object[] listOfnodes = { 3, 9, 20, null, null, 15, 7 };
-TreeNode root = TreeNode.BuildTree(listOfnodes);
-int result = TreeNode.MaxDepth(root);
-//TreeNode.PrintTree(root);
+object[] listOfnodes1 = [1, 7, 0, 7, -8, null, null];
+
+TreeNode root1 = TreeNode.BuildTreeBFS(listOfnodes1);
+TreeNode p = TreeNode.Find(root1, 5);
+TreeNode q = TreeNode.Find(root1, 1);
+
+int result = TreeNode.MaxLevelSum(root1);
+//TreeNode.PrintTree(result);
 //var result = listNode.PairSum(head);
 Console.WriteLine(result);
 
-//Console.WriteLine(string.Join(", ", treeNode));
+//Console.WriteLine(string.Join(", ", result));
+public class TreeNode
+{
+    private static int max = 0;
+    public int val;
+    public TreeNode left;
+    public TreeNode right;
+    public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
+    {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+    }
+
+    public static int MaxLevelSum(TreeNode root)
+    {
+        if (root == null)
+        {
+            return 0;
+        }
+        int maximalLevelSum = int.MinValue;
+        int levelWithMaxSum = 0;
+        Queue<TreeNode> queue = new Queue<TreeNode>();
+        queue.Enqueue(root);
+        int currentLevel = 1;
+        while (queue.Count > 0)
+        {
+            int levelSize = queue.Count;
+            int currentLevelSum = 0;
+            for (int i = 0; i < levelSize; i++)
+            {
+                TreeNode currentNode = queue.Dequeue();
+                currentLevelSum += currentNode.val;
+                if (currentNode.left != null)
+                {
+                    queue.Enqueue(currentNode.left);
+                }
+                if (currentNode.right != null)
+                {
+                    queue.Enqueue(currentNode.right);
+                }
+            }
+            if (currentLevelSum > maximalLevelSum)
+            {
+                maximalLevelSum = currentLevelSum;
+                levelWithMaxSum = currentLevel;
+            }
+            currentLevel++;
+        }
+        return levelWithMaxSum;
+    }
+    public IList<int> RightSideView(TreeNode root)
+    {
+        List<int> result = new List<int>();
+        DFS(root, 0, result);
+        return result;
+    }
+
+    private void DFS(TreeNode node, int depth, IList<int> result)
+    {
+        if (node == null)
+            return;
+
+        if (depth == result.Count)
+            result.Add(node.val);
+
+        DFS(node.right, depth + 1, result);
+        DFS(node.left, depth + 1, result);
+    }
+
+    public static TreeNode LowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q)
+    {
+        if (root == null)
+        {
+            return null;
+        }
+        if (root == p || root == q)
+        {
+            return root;
+        }
+        TreeNode left = LowestCommonAncestor(root.left, p, q);
+        TreeNode right = LowestCommonAncestor(root.right, p, q);
+        if (left != null && right != null)
+        {
+            return root;
+        }
+        if (left != null && right == null)
+        {
+            return left;
+        }
+        else
+        {
+            return right;
+        }
+
+
+
+    }
+    // Depth using recursion
+    public static int GetDepth(TreeNode root, TreeNode target, int depth)
+    {
+        if (root == null) return -1;
+        if (root == target) return depth;
+
+        int left = GetDepth(root.left, target, depth + 1);
+        if (left != -1) return left;
+
+        return GetDepth(root.right, target, depth + 1);
+    }
+
+    // Count nodes between p and q
+    public static int CountNodesBetween(TreeNode root, TreeNode p, TreeNode q)
+    {
+        TreeNode lca = LowestCommonAncestor(root, p, q);
+
+        int depthP = GetDepth(root, p, 0);
+        int depthQ = GetDepth(root, q, 0);
+        int depthLCA = GetDepth(root, lca, 0);
+
+        return depthP + depthQ - 2 * depthLCA + 1;
+    }
+    public static TreeNode Find(TreeNode root, int val)
+    {
+        if (root == null) return null;
+        if (root.val == val) return root;
+
+        TreeNode left = Find(root.left, val);
+        if (left != null) return left;
+
+        return Find(root.right, val);
+    }
+
+   
+
+    public static int LongestZigZag(TreeNode root)
+    {
+        if (root == null)
+        {
+            return max;
+        }
+        return 0;
+
+
+        DFS(root.right, false, true, 1);
+        DFS(root.left, true, false, 1);
+
+        return max;
+    }
+
+    private static void DFS(TreeNode node, bool cameFromLeft, bool cameFromRight, int length)
+    {
+        if (node == null)
+            return;
+
+        max = Math.Max(max, length);
+
+        if (cameFromLeft)
+        {
+            DFS(node.right, false, true, length + 1);
+
+            DFS(node.left, true, false, 1);
+        }
+        if (cameFromRight)
+        {
+            DFS(node.left, true, false, length + 1);
+
+            DFS(node.right, false, true, 1);
+        }
+    }
+    public static int MyPathSum(TreeNode root, int targetSum)
+    {
+        Dictionary<long, int> containsCountOfRunningSum = new Dictionary<long, int>();
+        containsCountOfRunningSum[0L] = 0;
+        return DFSRecursiveForThePathSum(root, 0L, targetSum, containsCountOfRunningSum);
+    }
+    public static int DFSRecursiveForThePathSum(TreeNode root, long runningSum, int targetSum, Dictionary<long, int> containsCountOfRunningSum)
+    {
+        if (root == null)
+        {
+            return 0;
+        }
+        runningSum += root.val;
+        long neededSum = runningSum - targetSum;
+
+        int count = 0;
+        if (containsCountOfRunningSum.ContainsKey(neededSum))
+        {
+            count = containsCountOfRunningSum[neededSum];
+        }
+        if (!containsCountOfRunningSum.ContainsKey(runningSum))
+        {
+            containsCountOfRunningSum[runningSum] = 0;
+        }
+        containsCountOfRunningSum[runningSum]++;
+
+        int totalCount = count + DFSRecursiveForThePathSum(root.left, runningSum, targetSum, containsCountOfRunningSum);
+        totalCount += DFSRecursiveForThePathSum(root.right, runningSum, targetSum, containsCountOfRunningSum);
+        containsCountOfRunningSum[runningSum]--;
+        return totalCount;
+    }
+    public static int PathSumRunningSum(TreeNode root, int targetSum)
+    {
+        // Use long for prefix sums to avoid overflow
+        Dictionary<long, int> prefixSumCount = new Dictionary<long, int>();
+
+        // Empty path prefix sum
+        prefixSumCount[0L] = 1;
+
+        return DFS(root, 0L, targetSum, prefixSumCount);
+    }
+
+    private static int DFS(TreeNode node, long runningSum, int targetSum, Dictionary<long, int> prefixSumCount)
+    {
+        if (node == null)
+        {
+            return 0;
+        }
+
+
+        // Update running sum using long
+        runningSum += (long)node.val;
+
+        long needed = runningSum - (long)targetSum;
+
+        int pathsEndingHere = prefixSumCount.ContainsKey(needed) ? prefixSumCount[needed] : 0;
+
+        if (!prefixSumCount.ContainsKey(runningSum))
+        {
+            prefixSumCount[runningSum] = 0;
+        }
+
+        prefixSumCount[runningSum]++;
+
+        int totalPaths = pathsEndingHere;
+        totalPaths += DFS(node.left, runningSum, targetSum, prefixSumCount);
+        totalPaths += DFS(node.right, runningSum, targetSum, prefixSumCount);
+
+        // Backtrack
+        prefixSumCount[runningSum]--;
+
+        return totalPaths;
+    }
+    public static int PathSum(TreeNode root, int targetSum)
+    {
+        if (root == null)
+        {
+            return 0;
+        }
+
+        int startFromRoot = GetValueOfPathCount(root, targetSum);
+        int startFromLeft = GetValueOfPathCount(root.left, targetSum);
+        int startFromRight = GetValueOfPathCount(root.right, targetSum);
+
+        return startFromRoot + startFromLeft + startFromRight;
+    }
+    public static int GetValueOfPathCount(TreeNode treeNode, int target)
+    {
+        if (treeNode == null)
+        { return 0; }
+        int count = 0;
+        int total = target - treeNode.val;
+        if (treeNode.val == target)
+        {
+            count++;
+        }
+        count += GetValueOfPathCount(treeNode.left, target - treeNode.val);
+        count += GetValueOfPathCount(treeNode.right, target - treeNode.val);
+        return count;
+    }
+
+    public static void PrintTree(TreeNode root)
+    {
+        if (root == null)
+        {
+            Console.WriteLine("Empty tree");
+            return;
+        }
+        Queue<TreeNode> q = new Queue<TreeNode>();
+        q.Enqueue(root);
+
+        while (q.Count > 0)
+        {
+            TreeNode node = q.Dequeue();
+
+            if (node == null)
+            {
+                Console.Write("null ");
+                continue;
+            }
+            Console.Write(node.val + " ");
+            q.Enqueue(node.left);
+            q.Enqueue(node.right);
+        }
+        Console.WriteLine();
+    }
+    public static TreeNode BuildTreeBFS(object[] arr)
+    {
+        if (arr == null || arr.Length == 0 || arr[0] == null)
+        {
+            return null;
+        }
+
+
+        TreeNode root = new TreeNode((int)arr[0]);
+        Queue<TreeNode> queue = new Queue<TreeNode>();
+        queue.Enqueue(root);
+
+        int i = 1;
+
+        while (queue.Count > 0 && i < arr.Length)
+        {
+            TreeNode current = queue.Dequeue();
+
+            // Left child
+            if (i < arr.Length && arr[i] != null)
+            {
+                current.left = new TreeNode((int)arr[i]);
+                queue.Enqueue(current.left);
+            }
+            i++;
+
+            // Right child
+            if (i < arr.Length && arr[i] != null)
+            {
+                current.right = new TreeNode((int)arr[i]);
+                queue.Enqueue(current.right);
+            }
+            i++;
+        }
+
+        return root;
+    }
+
+    public static TreeNode BuildTreeDFS(object[] arr)
+    {
+        if (arr == null || arr.Length == 0)
+            return null;
+
+        TreeNode[] nodes = new TreeNode[arr.Length];
+
+        // Create nodes only for non-null values
+        for (int i = 0; i < arr.Length; i++)
+        {
+            if (arr[i] != null)
+                nodes[i] = new TreeNode((int)arr[i]);
+        }
+
+        // Link children
+        for (int i = 0; i < arr.Length; i++)
+        {
+            if (nodes[i] == null)
+                continue;
+
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+            if (left < arr.Length)
+            {
+                nodes[i].left = nodes[left];
+            }
+            if (right < arr.Length)
+            {
+                nodes[i].right = nodes[right];
+            }
+        }
+        return nodes[0];
+    }
+
+    public static int MaxDepth(TreeNode root)
+    {
+        if (root == null)
+        {
+            return 0;
+        }
+        // preorder
+        int RootValue = root.val;
+        int leftDepth = MaxDepth(root.left);
+        int rightDepth = MaxDepth(root.right);
+        int maximial = Math.Max(leftDepth, rightDepth) + 1;
+        return maximial;
+    }
+    public static int MaxDepthIterativeVersion(TreeNode root)
+    {
+        if (root == null)
+        {
+            return 0;
+        }
+        Queue<TreeNode> queue = new Queue<TreeNode>();
+        queue.Enqueue(root);
+        int depth = 0;
+
+        while (queue.Count > 0)
+        {
+            int levelSize = queue.Count;
+            depth++;
+
+            for (int i = 0; i < levelSize; i++)
+            {
+                TreeNode node = queue.Dequeue();
+                if (node.left != null) queue.Enqueue(node.left);
+                if (node.right != null) queue.Enqueue(node.right);
+            }
+        }
+
+        return depth;
+    }
+    public bool LeafSimilar(TreeNode root1, TreeNode root2)
+    {
+        if (root1 == null || root2 == null)
+        {
+            return false;
+        }
+        List<int> nodes1 = new List<int>();
+        List<int> nodes2 = new List<int>();
+        GetLeaves(root1, nodes1);
+        GetLeaves(root2, nodes2);
+        if (nodes1.Count != nodes2.Count)
+        {
+            return false;
+        }
+        for (int i = 0; i < nodes1.Count; i++)
+        {
+            if (nodes1[i] != nodes2[i])
+            {
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    public static void GetLeaves(TreeNode root, List<int> listLeaves)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        if (root.left == null && root.right == null)
+        {
+            listLeaves.Add(root.val);
+            return;
+        }
+        GetLeaves(root.left, listLeaves);
+        GetLeaves(root.right, listLeaves);
+
+    }
+    public static int GoodNodes(TreeNode root)
+    {
+        int rootNodeValue = root.val;
+        int goodNodeCount = GetGoodNodeCount(root, rootNodeValue);
+
+        return goodNodeCount;
+    }
+
+    public static int GetGoodNodeCount(TreeNode root, int rootNodeCount)
+    {
+        int goodNodeCount = 0;
+        if (root == null)
+        {
+            return 0;
+        }
+        if (root.val >= rootNodeCount)
+        {
+            goodNodeCount++;
+
+        }
+        rootNodeCount = Math.Max(rootNodeCount, root.val);
+        goodNodeCount += GetGoodNodeCount(root.left, rootNodeCount);
+        goodNodeCount += GetGoodNodeCount(root.right, rootNodeCount);
+
+        return goodNodeCount;
+    }
+
+
+}
 
 public class RecentCounter
 {
@@ -193,7 +671,7 @@ public class ListNode(int val = 0, ListNode? next = null)
 
 public class Solution
 {
-    TreeNode treeNode = new TreeNode();
+    //TreeNode treeNode = new TreeNode();
 
     public static string PredictPartyVictory()
     {
@@ -229,8 +707,9 @@ public class Solution
         return Radiant.Count > 0 ? "Radiant" : "Dire";
        
     }
-    public static string DecodeString(string s)
+    public static string DecodeString()
     {
+        string s = "3[a2[dh]]";
        Stack<string> stackSubString = new Stack<string>();
         Stack<int> stackNumber = new Stack<int>();
         int number = 0;
@@ -254,7 +733,7 @@ public class Solution
             {
                 int storedNumber = stackNumber.Pop();
                 StringBuilder storedLetter = new StringBuilder(stackSubString.Pop());
-                string temp = storedLetter.ToString();
+                //string temp = storedLetter.ToString();
                 for (int i = 0; i < storedNumber; i++)
                 {
                     storedLetter.Append(currentSting);
@@ -269,8 +748,42 @@ public class Solution
         return currentSting.ToString();
     }
 
-    public static int[] AsteroidCollision(int[] asteroids)
-    {       
+    public static int[] AsteroidCollision()
+    {
+        int[] asteroids = [2, 3, -5];
+
+        Stack<int> stack = new Stack<int>();
+        for (int i = 0; i < asteroids.Length; i++)
+        {
+            if (asteroids[i] > 0)
+            {
+                stack.Push(asteroids[i]);
+            }
+            else
+            {
+                while (stack.Count > 0 && stack.Peek() > 0 && stack.Peek() < Math.Abs(asteroids[i]))
+                {      
+                    stack.Pop();                    
+                }
+                if (stack.Count > 0 && stack.Peek() == Math.Abs(asteroids[i]))
+                {
+                    stack.Pop();
+                }
+                if (stack.Count == 0 || stack.Peek() < 0)
+                {
+                    stack.Push(asteroids[i]);
+                }
+            }
+        }
+        int[] result = stack.ToArray();
+        Array.Reverse(result);
+        return result;
+    }
+
+    public static int[] AsteroidCollision1()
+    {
+        int[] asteroids = [5, 10, -5];
+
         Stack<int> stack = new Stack<int>();       
         for (int i = 0; i < asteroids.Length; i++)
         {
@@ -892,113 +1405,3 @@ public class Solution
     }
 }
 
-public class TreeNode
-{
-    public int val;
-    public TreeNode left;
-    public TreeNode right;
-    public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
-    {
-        this.val = val;
-        this.left = left;
-        this.right = right;
-    }
-    public static void PrintTree(TreeNode root)
-    {
-        if (root == null)
-        {
-            Console.WriteLine("Empty tree");
-            return;
-        }
-        Queue<TreeNode> q = new Queue<TreeNode>();
-        q.Enqueue(root);
-
-        while (q.Count > 0)
-        {
-            TreeNode node = q.Dequeue();
-
-            if (node == null)
-            {
-                Console.Write("null ");
-                continue;
-            }
-            Console.Write(node.val + " ");
-            q.Enqueue(node.left);
-            q.Enqueue(node.right);
-        }
-        Console.WriteLine();
-    }
-    public static TreeNode BuildTree(object[] arr)
-    {
-        if (arr == null || arr.Length == 0)
-            return null;
-
-        TreeNode[] nodes = new TreeNode[arr.Length];
-
-        // Create nodes only for non-null values
-        for (int i = 0; i < arr.Length; i++)
-        {
-            if (arr[i] != null)
-                nodes[i] = new TreeNode((int)arr[i]);
-        }
-
-        // Link children
-        for (int i = 0; i < arr.Length; i++)
-        {
-            if (nodes[i] == null)
-                continue;
-
-            int left = 2 * i + 1;
-            int right = 2 * i + 2;            
-            if (left < arr.Length)
-            {
-                nodes[i].left = nodes[left];
-            } 
-            if (right < arr.Length)
-            {
-                nodes[i].right = nodes[right];
-            }                
-        }
-        return nodes[0];
-    }
-
-    public static int MaxDepth(TreeNode root)
-    {
-        if (root == null)
-        {
-            return 0;
-        }
-        // preorder
-        int RootValue = root.val;
-        int leftDepth = MaxDepth(root.left);
-        int rightDepth = MaxDepth(root.right);
-        int maximial = Math.Max(leftDepth, rightDepth) + 1;
-        return maximial;
-    }
-    public static int MaxDepthIterativeVersion(TreeNode root)
-    {
-        if (root == null)
-        {
-            return 0;
-        }   
-        Queue<TreeNode> queue = new Queue<TreeNode>();
-        queue.Enqueue(root);
-        int depth = 0;
-
-        while (queue.Count > 0)
-        {
-            int levelSize = queue.Count;
-            depth++;
-
-            for (int i = 0; i < levelSize; i++)
-            {
-                TreeNode node = queue.Dequeue();
-                if (node.left != null) queue.Enqueue(node.left);
-                if (node.right != null) queue.Enqueue(node.right);
-            }
-        }
-
-        return depth;
-    }
-
-}
