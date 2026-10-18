@@ -1,19 +1,36 @@
 ﻿using System.Diagnostics.Tracing;
 using System.Reflection;
 using System.Text;
+using System.Xml.Linq;
 
 
-//var result = Solution.AsteroidCollision();
+//IList<IList<int>> rooms = new List<IList<int>>
+//{
+//    new List<int> { 2, 5 },     // room 0
+//    new List<int> { 3 },        // room 1
+//    new List<int> { 1 },        // room 2
+//    new List<int> { 4 },        // room 3
+//    new List<int>(),            // room 4
+//    new List<int> { 6 },        // room 5
+//    new List<int>()             // room 6
+//};
+int[][] connections = [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]];
+int result = Solution.MinReorderBFS(6, connections);
 //RecentCounter recentCounter = new RecentCounter();
 //Console.WriteLine(result);
 //ListNode listNode = new ListNode();
-object[] listOfnodes1 = [1, 7, 0, 7, -8, null, null];
+//object[] listOfnodes1 = [16,
+//8, 24,
+//4, 12, 20, 28,
+//2, 6, 10, 14, 18, 22, 26, 30,
+//1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31
+//];
 
-TreeNode root1 = TreeNode.BuildTreeBFS(listOfnodes1);
-TreeNode p = TreeNode.Find(root1, 5);
-TreeNode q = TreeNode.Find(root1, 1);
+//TreeNode root1 = TreeNode.BuildTreeBFS(listOfnodes1);
+//TreeNode p = TreeNode.Find(root1, 5);
+//TreeNode q = TreeNode.Find(root1, 4);
 
-int result = TreeNode.MaxLevelSum(root1);
+//TreeNode result = TreeNode.DeleteNodeV2(root1, 12);
 //TreeNode.PrintTree(result);
 //var result = listNode.PairSum(head);
 Console.WriteLine(result);
@@ -30,6 +47,152 @@ public class TreeNode
         this.val = val;
         this.left = left;
         this.right = right;
+    }
+    public static TreeNode InsertIntoBST(TreeNode root, int val)
+    {
+        if (root == null)
+            return new TreeNode(val);
+
+        if (val < root.val)
+            root.left = InsertIntoBST(root.left, val);
+        else
+            root.right = InsertIntoBST(root.right, val);
+
+        return root;
+    }
+
+    public static TreeNode InsertIntoBSTIterative(TreeNode root, int val)
+    {
+        if (root == null)
+            return new TreeNode(val);
+        TreeNode current = root;
+        while (true)
+        {
+            if (val < current.val)
+            {
+                if (current.left == null)
+                {
+                    current.left = new TreeNode(val);
+                    break;
+                }
+                else
+                {
+                    current = current.left;
+                }
+            }
+            else
+            {
+                if (current.right == null)
+                {
+                    current.right = new TreeNode(val);
+                    break;
+                }
+                else
+                {
+                    current = current.right;
+                }
+            }
+        }
+        return root;
+    }
+
+    public static TreeNode DeleteNodeV2(TreeNode root, int val)
+    {
+        if (root == null)
+        {
+            return null;
+        }
+        if (val < root.val)
+        {
+            root.left = DeleteNodeV2(root.left, val);
+        }
+        else if (val > root.val)
+        {
+            root.right = DeleteNodeV2(root.right, val);
+        }
+        else
+        {
+            
+            if (root.right == null)
+            {
+                return root.left;
+            }
+            if(root.left == null)
+            { 
+                return root.right;
+            }
+            TreeNode treeNode = root.right;
+            while (treeNode.left != null)
+            {
+                treeNode = treeNode.left;               
+            }
+            root.val = treeNode.val;
+
+            root.right = DeleteNodeV2(root.right, treeNode.val);
+        }
+        return root;
+    }
+    public static TreeNode DeleteNode(TreeNode root, int key)
+    {
+        if (root == null)
+            return null;
+
+        if (key < root.val)
+        {
+            root.left = DeleteNode(root.left, key);
+        }
+        else if (key > root.val)
+        {
+            root.right = DeleteNode(root.right, key);
+        }
+        else
+        {           
+            if (root.left == null)
+            {
+                return root.right;
+            } 
+            if (root.right == null)
+            {
+                return root.left;
+            }  
+            TreeNode minNode = root.right;
+            while (minNode.left != null)
+            {
+                minNode = minNode.left;
+            }
+                
+            root.val = minNode.val;
+            root.right = DeleteNode(root.right, minNode.val);
+        }
+        return root;
+
+    }
+    private static TreeNode FindMin(TreeNode node)
+    {
+        while (node.left != null)
+            node = node.left;
+        return node;
+    }
+
+    public static TreeNode SearchBST(TreeNode root, int val)
+    {
+        if (root == null)
+        {
+            return null;
+        }        
+        if (val < root.val)            
+        {
+            return SearchBST(root.left, val);
+        }
+        else if (val > root.val)
+        {
+            return SearchBST(root.right, val);
+        }
+        else
+        {
+            return root;
+        }
+        
     }
 
     public static int MaxLevelSum(TreeNode root)
@@ -69,23 +232,25 @@ public class TreeNode
         }
         return levelWithMaxSum;
     }
-    public IList<int> RightSideView(TreeNode root)
+    public static IList<int> RightSideView(TreeNode root)
     {
         List<int> result = new List<int>();
         DFS(root, 0, result);
         return result;
     }
 
-    private void DFS(TreeNode node, int depth, IList<int> result)
+    private static void DFS(TreeNode root, int depth, IList<int> result)
     {
-        if (node == null)
+        if (root == null)
             return;
-
+        int RootValue = root.val;
+        int DepthValue = depth;
+        int ListCount = result.Count;
         if (depth == result.Count)
-            result.Add(node.val);
+            result.Add(root.val);
 
-        DFS(node.right, depth + 1, result);
-        DFS(node.left, depth + 1, result);
+        DFS(root.right, depth + 1, result);
+        DFS(root.left, depth + 1, result);
     }
 
     public static TreeNode LowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q)
@@ -94,6 +259,12 @@ public class TreeNode
         {
             return null;
         }
+        int rootVaue = root.val;
+        int P_Value = p.val;
+        int Q_Value = q.val;
+        //[3, 5, 1, 6, 2, 0, 8, null, null, 7, 4];
+        // P = 5
+        // q = 1
         if (root == p || root == q)
         {
             return root;
@@ -112,9 +283,6 @@ public class TreeNode
         {
             return right;
         }
-
-
-
     }
     // Depth using recursion
     public static int GetDepth(TreeNode root, TreeNode target, int depth)
@@ -671,7 +839,347 @@ public class ListNode(int val = 0, ListNode? next = null)
 
 public class Solution
 {
-    //TreeNode treeNode = new TreeNode();
+    
+    public static int MinReorder(int n, int[][] connections)
+        {
+            List<List<(int, int)>> graph = new List<List<(int, int)>>();
+            for (int i = 0; i < n; i++)
+            {
+                graph.Add(new List<(int, int)>());
+            }
+
+            foreach (var conn in connections)
+            {
+                int u = conn[0];
+                int v = conn[1];
+
+                graph[u].Add((v, 1));
+                graph[v].Add((u, 0));
+            }
+
+            int changes = 0;
+            bool[] visited = new bool[n];
+
+            void DFS(int city)
+            {
+                visited[city] = true;
+                foreach (var (neighbor, cost) in graph[city])
+                {
+                    if (!visited[neighbor])
+                    {
+                        changes += cost;
+                        DFS(neighbor);
+                    }
+                }
+            }
+
+            DFS(0);
+            return changes;
+        }
+    
+    public static int MinReorderHshSet(int citiesCount, int[][] cityConnections)
+    {
+        List<List<int>> neighbors = new List<List<int>>();
+        for (int i = 0; i < citiesCount; i++)
+        {
+            neighbors.Add(new List<int>());
+        }            
+        HashSet<string> directions = new HashSet<string>();
+        foreach (var connection in cityConnections)
+        {
+            int fromCity = connection[0];
+            int toCity = connection[1];
+
+            neighbors[fromCity].Add(toCity);
+            neighbors[toCity].Add(fromCity);
+
+            directions.Add($"{fromCity}-{toCity}");
+        }
+        bool[] visitedCity = new bool[citiesCount];
+        return HashSetDFS(0, neighbors, visitedCity, directions);
+    }
+    private static int HashSetDFS(int city, List<List<int>> neighbors, bool[] visitedCity, HashSet<string> directions)
+    {
+        //int[][] connections = [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]];
+        visitedCity[city] = true;
+        int changes = 0;
+
+        foreach (int neighbor in neighbors[city])
+        {
+            if (!visitedCity[neighbor])
+            {
+                // إذا كان الطريق الأصلي هو city → next فهذا اتجاه خاطئ
+                if (directions.Contains($"{city}-{neighbor}"))
+                    changes++;
+
+                changes += HashSetDFS(neighbor, neighbors, visitedCity, directions);
+            }
+        }
+
+        return changes;
+    }
+
+    public static int MinReorderBFS(int n, int[][] cityConnections)
+    {
+        List<List<(int to, int cost)>> connections = new();
+
+        for (int i = 0; i < n; i++)
+        {
+            connections.Add(new List<(int, int)>());
+        }
+           
+
+        foreach (var city in cityConnections)
+        {
+            connections[city[0]].Add((city[1], 1)); // خاطئ
+            connections[city[1]].Add((city[0], 0)); // صحيح
+        }
+
+        bool[] visited = new bool[n];
+        Queue<int> q = new();
+        q.Enqueue(0);
+        visited[0] = true;
+
+        int changes = 0;
+
+        while (q.Count > 0)
+        {
+            int city = q.Dequeue();
+
+            foreach (var currentcity in connections[city])
+            {
+                if (!visited[currentcity.to])
+                {
+                    visited[currentcity.to] = true;
+                    changes += currentcity.cost;
+                    q.Enqueue(currentcity.to);
+                }
+            }
+        }
+        return changes;
+    }
+
+    public static int MinReorderDFS(int n, int[][] connections)
+    {
+        List<List<(int to, int cost)>> graph = new List<List<(int, int)>>();
+
+        for (int i = 0; i < n; i++)
+        {
+            graph.Add(new List<(int, int)>());
+        }            
+
+        foreach (var c in connections)
+        {
+            int from = c[0];
+            int to = c[1];
+
+            graph[from].Add((to, 1));  // اتجاه خاطئ (يجب قلبه)
+            graph[to].Add((from, 0));  // اتجاه صحيح
+        }
+
+        bool[] visited = new bool[n];
+        return RoadConnectionDFS(0, graph, visited);
+    }
+
+    private static int RoadConnectionDFS(int node, List<List<(int to, int cost)>> graph, bool[] visited)
+    {
+        visited[node] = true;
+        int changes = 0;
+
+        foreach (var edge in graph[node])
+        {
+            if (!visited[edge.to])
+            {
+                changes += edge.cost;   // إذا cost = 1 → يجب قلب الطريق
+                changes += RoadConnectionDFS(edge.to, graph, visited);
+            }
+        }
+
+        return changes;
+    }
+
+    public static int CountAlleNewProv(int[][] verbondenSteden)
+    {
+        
+        int count = 0;
+        bool[] isHetVerbonden = new bool[verbondenSteden.Length];
+        for (int i = 0; i < verbondenSteden.Length; i++)
+        {
+            if (!isHetVerbonden[i])
+            {
+                LoopDoorAllSteden(i, verbondenSteden, isHetVerbonden);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static void LoopDoorAllSteden(int i, int[][] verbondenSteden, bool[] isHetVerbonden)
+    {
+       
+        isHetVerbonden[i] = true;
+        for (int j = 0; j < verbondenSteden.Length; j++)
+        {
+            if (verbondenSteden[i][j] == 1 && !isHetVerbonden[j])
+            {
+                LoopDoorAllSteden(j, verbondenSteden, isHetVerbonden);
+            }
+        }
+    }
+
+    public static int FindCircleNum(int[][] isConnected)
+    {
+        int count = 0;
+        bool[] conected = new bool[isConnected.Length];
+        for (int i = 0; i < isConnected.Length; i++)
+        {
+            if (!conected[i])
+            {
+                CityDFS(i, isConnected, conected);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static void CityDFS(int i, int[][] isConnected, bool[] conected)
+    {
+        conected[i] = true;
+        for (int j = 0; j < isConnected.Length; j++)
+        {
+            if (isConnected[i][j] == 1 && !conected[j])
+            {
+                CityDFS(j, isConnected, conected);
+            }
+        }
+    }
+
+    public static bool VisitidAllRooms(IList<IList<int>> rooms)
+    {
+        bool[] visited = new bool[rooms.Count];
+        int count = 0;
+        MyDFS(0, rooms, visited, ref count);
+        return count == visited.Length;
+    }
+
+    private static void MyDFS(int key, IList<IList<int>> rooms, bool[] visited , ref int count)
+    {
+       if (!visited[key])
+        {
+            visited[key] = true;
+            count++;
+            foreach (int nextKey in rooms[key])
+            {
+                MyDFS(nextKey, rooms, visited, ref count);
+            }
+        }
+    }
+
+    public static bool CanVisitAllRoomsSuperFast(IList<IList<int>> rooms)
+        {
+
+            bool[] visited = new bool[rooms.Count()];
+            int counter = 0;
+
+            VisitRoomAndCollectKeys(0, rooms, visited, ref counter);
+
+            if (counter == visited.Length)
+                return true;
+
+            return false;
+        }
+
+    static void VisitRoomAndCollectKeys(int room, IList<IList<int>> rooms, bool[] visited, ref int counter)
+        {
+            if (!visited[room])
+            {
+                visited[room] = true;
+                counter++;
+
+                foreach (int key in rooms[room])
+                {
+                    VisitRoomAndCollectKeys(key, rooms, visited, ref counter);
+                }
+            }
+        }
+    
+
+    public static bool CanVisitAllKamers(IList<IList<int>> rooms)
+    {
+        HashSet<int> visitedRooms = new HashSet<int>();
+        Stack<int> TobevisitedRooms = new Stack<int>();
+        visitedRooms.Add(0);
+        TobevisitedRooms.Push(0);
+        while(TobevisitedRooms.Count > 0)
+        {
+            int currentRoom = TobevisitedRooms.Pop();
+            foreach(int key in rooms[currentRoom])
+            {
+                if(!visitedRooms.Contains(key))
+                {
+                    visitedRooms.Add(key);
+                    TobevisitedRooms.Push(key);
+                }
+            }
+        }
+        if(visitedRooms.Count == rooms.Count)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public static bool CanVisitAllRooms(IList<IList<int>> rooms)
+    {
+        HashSet<int> visitedRoom = new HashSet<int>();
+        Stack<int> roomsTobeVisited = new Stack<int>();
+
+        // Start with room 0
+        visitedRoom.Add(0);
+        roomsTobeVisited.Push(0);
+
+        while (roomsTobeVisited.Count > 0)
+        {
+            int currentRoom = roomsTobeVisited.Pop();
+
+            foreach (int key in rooms[currentRoom])
+            {
+                if (!visitedRoom.Contains(key))
+                {
+                    visitedRoom.Add(key);
+                    roomsTobeVisited.Push(key);
+                }
+            }
+        }
+
+        return visitedRoom.Count == rooms.Count;
+    }
+
+    public static bool CanVisitAllRoomsSlow(IList<IList<int>> rooms)
+    {
+        HashSet<int> visitedRooms = new HashSet<int>();
+        HashSet<int> keys = new HashSet<int>();
+        visitedRooms.Add(0);
+        keys.UnionWith(rooms[0]);
+        bool foundNewKey = true;
+        while(foundNewKey)
+        {
+            foundNewKey = false;
+            for (int i = 1; i < rooms.Count; i++)
+            {                
+                if (!visitedRooms.Contains(i) && keys.Contains(i))
+                {
+                    visitedRooms.Add(i);
+                    keys.UnionWith(rooms[i]);
+                    foundNewKey = true;
+                }
+            }
+        }
+        
+        return rooms.Count == visitedRooms.Count;
+    }
 
     public static string PredictPartyVictory()
     {
@@ -1067,11 +1575,16 @@ public class Solution
         int sum = 0;
         for(int i =0; i < k; i++)
         {
+            int aa = nums[i];
             sum += nums[i];
         }
         int maxSum = sum;
-        for(int i = k; i < nums.Length; i++)
-        {            
+        //[1, 12, -5, -6, 50, 3];
+        for (int i = k; i < nums.Length; i++)
+        {    
+            int kk = nums[i];
+            int hh = nums[i - k];
+            int tty = nums[i] - nums[i - k];
             sum += nums[i] - nums[i - k];
             maxSum = Math.Max(maxSum, sum);
         }
