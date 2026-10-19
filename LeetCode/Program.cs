@@ -1,38 +1,12 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
 
-//IList<IList<int>> rooms = new List<IList<int>>
-//{
-//    new List<int> { 2, 5 },     // room 0
-//    new List<int> { 3 },        // room 1
-//    new List<int> { 1 },        // room 2
-//    new List<int> { 4 },        // room 3
-//    new List<int>(),            // room 4
-//    new List<int> { 6 },        // room 5
-//    new List<int>()             // room 6
-//};
-int[][] connections = [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]];
-int result = Solution.MinReorderBFS(6, connections);
-//RecentCounter recentCounter = new RecentCounter();
-//Console.WriteLine(result);
-//ListNode listNode = new ListNode();
-//object[] listOfnodes1 = [16,
-//8, 24,
-//4, 12, 20, 28,
-//2, 6, 10, 14, 18, 22, 26, 30,
-//1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31
-//];
 
-//TreeNode root1 = TreeNode.BuildTreeBFS(listOfnodes1);
-//TreeNode p = TreeNode.Find(root1, 5);
-//TreeNode q = TreeNode.Find(root1, 4);
-
-//TreeNode result = TreeNode.DeleteNodeV2(root1, 12);
-//TreeNode.PrintTree(result);
-//var result = listNode.PairSum(head);
+int result = Solution.NearestExit();
 Console.WriteLine(result);
 
 //Console.WriteLine(string.Join(", ", result));
@@ -838,8 +812,144 @@ public class ListNode(int val = 0, ListNode? next = null)
 }
 
 public class Solution
-{
-    
+{   
+    public static int NearestExit()
+    {
+        char[][] maze = [['+', '+', '+'], ['.', '.', '.'], ['+', '+', '+']];
+        int[] entrance = [1, 0];
+        int mazeRows = maze.Length;
+        int mazeCols = maze[0].Length;
+
+        int entranceRow = entrance[0];
+        int entranceCol = entrance[1];
+        
+        int[][] directions = new int[][]
+        {
+        [1, 0],   
+        [-1, 0],  
+        [0, 1],   
+        [0, -1]  
+        };
+
+        
+        Queue<(int row, int col, int dist)> queue = new Queue<(int, int, int)>();
+        queue.Enqueue((entranceRow, entranceCol, 0));
+
+       
+        bool[,] visited = new bool[mazeRows, mazeCols];
+        visited[entranceRow, entranceCol] = true;
+
+        while (queue.Count > 0)
+        {
+            var (row, col, dist) = queue.Dequeue();
+
+            foreach (var direction in directions)
+            {
+                int rowNumber = row + direction[0];
+                int colNumber = col + direction[1];
+
+                // Byond Border
+                if (rowNumber < 0 || rowNumber >= mazeRows || colNumber < 0 || colNumber >= mazeCols)
+                    continue;
+
+                
+                if (maze[rowNumber][colNumber] == '+' || visited[rowNumber, colNumber])
+                    continue;
+
+                
+                if ((rowNumber == 0 || rowNumber == mazeRows - 1 || colNumber == 0 || colNumber == mazeCols - 1)
+                    && !(rowNumber == entranceRow && colNumber == entranceCol))
+                {
+                    return dist + 1;
+                }
+
+                visited[rowNumber, colNumber] = true;
+                queue.Enqueue((rowNumber, colNumber, dist + 1));
+            }
+        }
+
+        return -1;
+    }
+
+    public static double[] CalcEquation()
+    {
+         
+    IList<IList<string>> equations = [["a", "b"], ["b", "c"]];
+    double[] values = [2.0, 3.0];
+    IList<IList<string>> queries = [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]];
+        // 1) Build graph: each variable → list of (neighbor, weight)
+        var lettersAndItsValue = new Dictionary<string, List<(string neighbor, double weight)>>();
+        for (int i = 0; i < equations.Count; i++)
+        {
+            string firstLetter = equations[i][0];
+            string secondLetter = equations[i][1];
+            double value = values[i];
+
+            if (!lettersAndItsValue.ContainsKey(firstLetter))
+                lettersAndItsValue[firstLetter] = new List<(string, double)>();
+
+            if (!lettersAndItsValue.ContainsKey(secondLetter))
+                lettersAndItsValue[secondLetter] = new List<(string, double)>();
+
+            // A / B = value
+            lettersAndItsValue[firstLetter].Add((secondLetter, value));
+
+            // B / A = 1/value
+            lettersAndItsValue[secondLetter].Add((firstLetter, 1.0 / value));
+        }
+
+        // 2) Process queries
+        double[] result = new double[queries.Count];
+
+        for (int i = 0; i < queries.Count; i++)
+        {
+            string start = queries[i][0];
+            string end = queries[i][1];
+
+            result[i] = Evaluate(start, end, lettersAndItsValue);
+        }
+
+        return result;
+    }
+    private static double Evaluate(string start, string end,
+    Dictionary<string, List<(string neighbor, double weight)>> graph)
+    {
+        // If either variable does not exist → impossible
+        if (!graph.ContainsKey(start) || !graph.ContainsKey(end))
+            return -1.0;
+
+        // a / a = 1
+        if (start == end)
+            return 1.0;
+
+        var queue = new Queue<(string node, double value)>();
+        var visited = new HashSet<string>();
+
+        queue.Enqueue((start, 1.0));
+        visited.Add(start);
+
+        while (queue.Count > 0)
+        {
+            var (current, currentValue) = queue.Dequeue();
+
+            foreach (var edge in graph[current])
+            {
+                if (visited.Contains(edge.neighbor))
+                    continue;
+
+                double nextValue = currentValue * edge.weight;
+
+                if (edge.neighbor == end)
+                    return nextValue;
+
+                visited.Add(edge.neighbor);
+                queue.Enqueue((edge.neighbor, nextValue));
+            }
+        }
+
+        return -1.0;
+    }
+
     public static int MinReorder(int n, int[][] connections)
         {
             List<List<(int, int)>> graph = new List<List<(int, int)>>();
@@ -876,65 +986,25 @@ public class Solution
             DFS(0);
             return changes;
         }
-    
-    public static int MinReorderHshSet(int citiesCount, int[][] cityConnections)
-    {
-        List<List<int>> neighbors = new List<List<int>>();
-        for (int i = 0; i < citiesCount; i++)
-        {
-            neighbors.Add(new List<int>());
-        }            
-        HashSet<string> directions = new HashSet<string>();
-        foreach (var connection in cityConnections)
-        {
-            int fromCity = connection[0];
-            int toCity = connection[1];
-
-            neighbors[fromCity].Add(toCity);
-            neighbors[toCity].Add(fromCity);
-
-            directions.Add($"{fromCity}-{toCity}");
-        }
-        bool[] visitedCity = new bool[citiesCount];
-        return HashSetDFS(0, neighbors, visitedCity, directions);
-    }
-    private static int HashSetDFS(int city, List<List<int>> neighbors, bool[] visitedCity, HashSet<string> directions)
-    {
-        //int[][] connections = [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]];
-        visitedCity[city] = true;
-        int changes = 0;
-
-        foreach (int neighbor in neighbors[city])
-        {
-            if (!visitedCity[neighbor])
-            {
-                // إذا كان الطريق الأصلي هو city → next فهذا اتجاه خاطئ
-                if (directions.Contains($"{city}-{neighbor}"))
-                    changes++;
-
-                changes += HashSetDFS(neighbor, neighbors, visitedCity, directions);
-            }
-        }
-
-        return changes;
-    }
-
+   
     public static int MinReorderBFS(int n, int[][] cityConnections)
     {
-        List<List<(int to, int cost)>> connections = new();
+        List<List<(int neighbor, int fixCost)>> connections = new();
 
         for (int i = 0; i < n; i++)
         {
             connections.Add(new List<(int, int)>());
         }
-           
 
+       
         foreach (var city in cityConnections)
         {
-            connections[city[0]].Add((city[1], 1)); // خاطئ
-            connections[city[1]].Add((city[0], 0)); // صحيح
+            int from = city[0];
+            int to = city[1];
+            connections[from].Add((to, 1));
+            connections[to].Add((from, 0)); 
         }
-
+       
         bool[] visited = new bool[n];
         Queue<int> q = new();
         q.Enqueue(0);
@@ -948,53 +1018,14 @@ public class Solution
 
             foreach (var currentcity in connections[city])
             {
-                if (!visited[currentcity.to])
+                if (!visited[currentcity.neighbor])
                 {
-                    visited[currentcity.to] = true;
-                    changes += currentcity.cost;
-                    q.Enqueue(currentcity.to);
+                    visited[currentcity.neighbor] = true;
+                    changes += currentcity.fixCost;
+                    q.Enqueue(currentcity.neighbor);
                 }
             }
         }
-        return changes;
-    }
-
-    public static int MinReorderDFS(int n, int[][] connections)
-    {
-        List<List<(int to, int cost)>> graph = new List<List<(int, int)>>();
-
-        for (int i = 0; i < n; i++)
-        {
-            graph.Add(new List<(int, int)>());
-        }            
-
-        foreach (var c in connections)
-        {
-            int from = c[0];
-            int to = c[1];
-
-            graph[from].Add((to, 1));  // اتجاه خاطئ (يجب قلبه)
-            graph[to].Add((from, 0));  // اتجاه صحيح
-        }
-
-        bool[] visited = new bool[n];
-        return RoadConnectionDFS(0, graph, visited);
-    }
-
-    private static int RoadConnectionDFS(int node, List<List<(int to, int cost)>> graph, bool[] visited)
-    {
-        visited[node] = true;
-        int changes = 0;
-
-        foreach (var edge in graph[node])
-        {
-            if (!visited[edge.to])
-            {
-                changes += edge.cost;   // إذا cost = 1 → يجب قلب الطريق
-                changes += RoadConnectionDFS(edge.to, graph, visited);
-            }
-        }
-
         return changes;
     }
 
