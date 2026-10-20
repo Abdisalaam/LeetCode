@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 
 
-int result = Solution.NearestExit();
+int result = Solution.OrangesRotting();
 Console.WriteLine(result);
 
 //Console.WriteLine(string.Join(", ", result));
@@ -812,7 +812,65 @@ public class ListNode(int val = 0, ListNode? next = null)
 }
 
 public class Solution
-{   
+{
+    public static int OrangesRotting()
+    {
+        int[][] grid = [[2, 1, 1], [1, 1, 0], [0, 1, 1]];
+        int rows = grid.Length;
+        int cols = grid[0].Length;
+
+        Queue<(int row, int col)> q = new Queue<(int, int)>();
+        int freshOranges = 0;
+
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (grid[r][c] == 2)
+                    q.Enqueue((r, c));
+                else if (grid[r][c] == 1)
+                    freshOranges++;
+            }
+        }
+        if (freshOranges == 0) return 0;
+        int minutes = 0;
+        int[][] dirs = new int[][] {        
+            [1,0],
+            [-1,0],        
+            [0,1], 
+            [0,-1]    
+        };        
+        while (q.Count > 0)
+        {
+            int size = q.Count;
+            bool isItRottend = false;
+
+            for (int i = 0; i < size; i++)
+            {
+                var (row, col) = q.Dequeue();
+
+                foreach (var d in dirs)
+                {
+                    int rowNumber = row + d[0];
+                    int colNumber = col + d[1];
+
+                    if (rowNumber >= 0 && rowNumber < rows && colNumber >= 0 && colNumber < cols && grid[rowNumber][colNumber] == 1)
+                    {
+                        grid[rowNumber][colNumber] = 2;   // rot it
+                        freshOranges--;
+                        q.Enqueue((rowNumber, colNumber));
+                        isItRottend = true;
+                    }
+                }
+            }
+
+            if (isItRottend)
+                minutes++;
+        }
+
+        return freshOranges == 0 ? minutes : -1;
+    }
+
     public static int NearestExit()
     {
         char[][] maze = [['+', '+', '+'], ['.', '.', '.'], ['+', '+', '+']];
