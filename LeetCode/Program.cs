@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 
 
-int result = Solution.OrangesRotting();
+int result = Solution.MaxVowels();
 Console.WriteLine(result);
 
 //Console.WriteLine(string.Join(", ", result));
@@ -1609,6 +1609,32 @@ public class Solution
         return maxlength;
 
     }
+    public static int LongestOnes()
+    {
+        int[] nums = [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0];
+        int k = 2;
+        int countOzeros = 0;
+        int max = 0;
+        int indexOfZero = 0;
+        for (int i = 0; i < nums.Length; i++)
+        {
+            if (nums[i] == 0)
+            {
+                countOzeros++;
+            }
+            while(k < countOzeros)
+            {
+                if (nums[indexOfZero] == 0)
+                {
+                    countOzeros--;
+                }
+                indexOfZero++;
+            }
+            max = Math.Max(max, i - indexOfZero + 1);
+        }
+        return max;
+    }
+
     public static int LongestOnes(int[] nums, int k)
     {
         int j = 0;
@@ -1632,92 +1658,105 @@ public class Solution
         }
         return longestOnesLength;
     }
-    public static int MaxVowels(string s, int k)
+
+    public static int MaxVowels()
     {
-        HashSet<char> vowels = new HashSet<char>()
-    {
-        'a','e','i','o','u',
-        'A','E','I','O','U'
-    };
-        int current = 0; int max = 0;       
+        string s = "aaaiiieee";
+        int k = 3;
+        HashSet<char> vowels = new HashSet<char>()    
+        {      
+            'a','e','i','o','u',       
+            'A','E','I','O','U'   
+        };
+       int current = 0; 
         for (int i = 0; i < k; i++)
         {
             if (vowels.Contains(s[i]))
+            {
                 current++;
+            }
         }
-        max = current;       
+        int max = current;
         for (int i = k; i < s.Length; i++)
-        {           
+        {
+            //"abciiidef";
             if (vowels.Contains(s[i]))
+            {
                 current++;
-           
+            }
             if (vowels.Contains(s[i - k]))
+            {
                 current--;
-
+            }
             max = Math.Max(max, current);
         }
-
         return max;
     }
-    public static double FindMaxAverage(int[] nums, int k)
+
+    public static double FindMaxAverage()
     {
+        int[] nums = [1, 12, -5, -6, 50, 3];
+        int k = 4;
         int sum = 0;
-        for(int i =0; i < k; i++)
+
+        for (int i = 0; i < k; i++)
         {
-            int aa = nums[i];
             sum += nums[i];
         }
-        int maxSum = sum;
-        //[1, 12, -5, -6, 50, 3];
+        int max = sum;
         for (int i = k; i < nums.Length; i++)
-        {    
-            int kk = nums[i];
-            int hh = nums[i - k];
-            int tty = nums[i] - nums[i - k];
-            sum += nums[i] - nums[i - k];
-            maxSum = Math.Max(maxSum, sum);
-        }
-        double result = (double)maxSum / k;
-        return result;
-
-    }
-    public static int MaxOperations(int[] nums, int k)
-    {
-        int operations = 0;
-        Dictionary<int, int> numbersCounts = new Dictionary<int, int>();
-        for (int i = 0; i < nums.Length; i++)
         {            
-            int number = k - nums[i];
-            if (numbersCounts.ContainsKey(number) && numbersCounts[number] > 0)
+            sum += nums[i] - nums[i - k];
+            max = Math.Max(max, sum);
+        }
+        double result = (double)max / k;
+        return result;
+    }
+
+    public static int MaxOperations()
+    {
+        int[] nums = [1, 2, 3, 4];
+        int k = 5;
+        int operationCount = 0;
+        Dictionary<int, int> keyValuePairs = new Dictionary<int, int>();
+        for (int i = 0; i < nums.Length; i++)
+        {
+            int result = k - nums[i];
+            if (keyValuePairs.ContainsKey(result) && keyValuePairs[result] > 0)
             {
-                operations++;                
-                numbersCounts[number]--;
+                operationCount++;
+                keyValuePairs[result]--;
             }
             else
             {
-                if (!numbersCounts.ContainsKey(nums[i]))
+                if (!keyValuePairs.ContainsKey(nums[i]))
                 {
-                    numbersCounts[nums[i]] = 0;
+                    keyValuePairs[nums[i]] = 0;
                 }
-                numbersCounts[nums[i]]++;
+                keyValuePairs[nums[i]]++;
             }
         }
-        return operations;
+
+        return operationCount;
     }
-    public static int MaxArea(int[] height)
+
+
+    public static int MaxArea()
     {
+        int[] height = [1, 8, 6, 2, 5, 4, 8, 3, 7];
         int left = 0;
-        int right = height.Length - 1;
+        int right = height.Length -1;
         int maxArea = 0;
         while (left < right)
         {
-           
-            int currentArea = Math.Min(height[left], height[right]) * (right - left);
+            int minimumHeight = Math.Min(height[left], height[right]);
+            int width = right - left;
+            int currentArea = minimumHeight * width;
             if (currentArea > maxArea)
             {
                 maxArea = currentArea;
             }
-           if (height[left] < height[right])
+            if (height[left] < height[right])
             {
                 left++;
             }
@@ -1728,43 +1767,83 @@ public class Solution
         }
         return maxArea;
     }
-    public static bool IsSubsequence(string s, string t)
+
+    public static bool IsSubsequence()
     {
-        if (s.Length == 0) return true;
-        if (t.Length == 0) return false;
-        int j = 0;
+        string s = "axc",  t = "ahbgdc";
+        if (string.IsNullOrEmpty(s))
+        {
+            return true;
+        }
+        if (string.IsNullOrEmpty(t))
+        {
+            return false;
+        }
+        int count = 0;
         for (int i = 0; i < t.Length; i++)
         {
-           
-            if (j < s.Length && s[j] == t[i])
+            if (s[count] == t[i])
             {
-                j++;
+                count++;               
             }
         }
-        return j == s.Length;
+        if (count == s.Length)
+        {
+            return true;
+        }
+        return false;
     }
-    public static int[] MoveZeroes(int[] nums)
-    {        
+
+    public static int[] MoveZeroesv2()
+    {
+        int[] nums = [0, 1, 0, 3, 12];
+        int write = 0;
+
+        // Write all non-zero numbers
+        for (int i = 0; i < nums.Length; i++)
+        {
+            if (nums[i] != 0)
+            {
+                nums[write] = nums[i];
+                write++;
+            }
+        }
+
+        // Fill the rest with zeros
+        while (write < nums.Length)
+        {
+            nums[write] = 0;
+            write++;
+        }
+
+        return nums;
+    }
+
+    public static int[] MoveZeroes()
+    {
+        int[] nums = [0, 1, 0, 3, 12];
         int pivot = 0;
         for (int i = 0; i < nums.Length; i++)
         {
             if (nums[i] != 0)
             {
                 int temp = nums[pivot];
-                nums[pivot] = nums[i];
-                nums[i] = temp;
+                 nums[pivot] = nums[i];
+                 nums[i] = temp;
                 pivot++;
             }
         }
         return nums;
     }
-    public static int Compress2(char[] chars)
+
+    public static int CompressFast()
     {
+        char[] chars = ['a', 'a', 'b', 'b', 'c', 'c', 'c'];
         int write = 0;
         int count = 1;
         for (int i = 0; i < chars.Length; i++)
         {
-            if (i < chars.Length - 1 && chars[i] == chars[i + 1])
+            if (i < chars.Length -1 && chars[i] == chars[i + 1])
             {
                 count++;
             }
@@ -1774,8 +1853,8 @@ public class Solution
                 write++;
                 if (count > 1)
                 {
-                    string countStr = count.ToString();
-                    foreach (char c in countStr)
+                    string digit = count.ToString();
+                    foreach (char c in digit)
                     {
                         chars[write] = c;
                         write++;
@@ -1784,46 +1863,64 @@ public class Solution
                 count = 1;
             }
         }
-
-        return write;
+       return write;
     }
-    public static int Compress(char[] chars)
+
+    public static int Compress()
     {
+        char[] chars = ['a', 'a', 'b', 'b', 'c', 'c', 'c'];
         int write = 0;
-        Dictionary<char, int> charCount = new Dictionary<char, int>();
-        for (int i = 0; i < chars.Length; i++)
+        int read = 0;
+        while (read < chars.Length)
         {
-            if (charCount.ContainsKey(chars[i]))
+            int count = 0;
+            char current = chars[read];
+            while (read < chars.Length && chars[read] == current)
             {
-                charCount[chars[i]]++;
+                read++;
+                count++;
             }
-            else
+            chars[write] = current;
+            write++;
+            if (count > 1)
             {
-                charCount[chars[i]] = 1;
-            }
-            bool isLastChar = (i == chars.Length - 1) || chars[i] != chars[i + 1];
-            if (isLastChar)
-            {                
-                chars[write] = chars[i];
-                write++;
-                if (charCount[chars[i]] > 1)
+                foreach (char c in count.ToString())
                 {
-                    string countStr = charCount[chars[i]].ToString();
-                    foreach (char c in countStr)
-                    {                       
-                        chars[write] = c;
-                        write++;
-                    }
+                    chars[write] = c;                    
+                    write++;
                 }
-                charCount.Clear();
             }
         }        
-        return write;
+        return write; 
     }
-    public static bool IncreasingTriplet(int[] nums)
+    public static bool IncreasingTriplet()
     {
-       int first = int.MaxValue;
-        int second = int.MaxValue;
+        int[] nums = [5, 2, 1, 6, 5, 7];
+        
+
+       for (int i = 0; i < nums.Length; i ++)
+        {            
+            for (int j = i + 1; j < nums.Length; j++)
+            {
+                for (int k = j + 1; k < nums.Length; k++)
+                {
+                    if (nums[i] < nums[j] && nums[j] < nums[k])
+                    {
+                        return true;
+                    }
+                }
+            }           
+          
+        }
+
+        return false;
+    }
+
+    public static bool IncreasingTripletV1()
+    {
+        int[] nums = [5, 2, 1, 6, 5, 7];
+        int first = nums.Max();
+        int second = nums.Max();
         for (int i = 0; i < nums.Length; i++)
         {
             if (nums[i] <= first)
@@ -1843,32 +1940,29 @@ public class Solution
 
         return false;
     }
-    public static int[] ProductExceptSelf(int[] nums)
+
+    public static int[] ProductExceptSelf()
     {
-        //int[] nums = { 1, 2, 3, 4 };
+        int[] nums = { 5, 2, 1 };       
 
-        //int[] Left = { 1, 1, 2, 6 };
-
-        //int[] Right = { 24, 12, 4, 1 };
-        //int[] Result = { 24, 12, 8, 6 };
-
-        int[] result = new int[nums.Length]; 
-        
-        int leftProduct = 1;
+        int[] result = new int[nums.Length];
+        int left = 1;
         for (int i = 0; i < nums.Length; i++)
         {
-            result[i] = leftProduct;
-            leftProduct *= nums[i];
+            result[i] = left;
+            left *= nums[i];
         }
-
-        int rightProduct = 1;
-        for (int i = nums.Length - 1; i >= 0; i--)
+        int right = 1;
+        for (int i = nums.Length -1; i >= 0; i--)
         {
-            result[i] *= rightProduct;
-            rightProduct *= nums[i];
+            result[i] *= right;
+            right *= nums[i];
         }
+      
         return result;
     }
+
+
     public static string ReverseWords(string s)
     {
         //string[] words = s.Split(" ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -1886,38 +1980,42 @@ public class Solution
         }
         return string.Join(" ", words);
     }
-    public static string ReverseVowels(string s)
+    public static string ReverseVowels()
     {
+        string s = "leetcode";
         HashSet<char> vowels = new HashSet<char>()
             {
                 'a','e','i','o','u',
                 'A','E','I','O','U'
             };
+       
+        int startFromLeft = 0;
+        int startFromRight = s.Length - 1;
         char[] word = s.ToCharArray();
-        int leftStartPoint = 0;
-        int rightStartPoint = word.Length - 1;
-
-        while (leftStartPoint < rightStartPoint)
+        while (startFromLeft < startFromRight)
         {
-
-            while (leftStartPoint < rightStartPoint && !vowels.Contains(word[leftStartPoint]))
+            char aa = word[startFromLeft];
+            char bb = word[startFromRight];
+            while (startFromLeft < startFromRight && !vowels.Contains(word[startFromLeft]))
             {
-                leftStartPoint++;
+               startFromLeft++;
             }
-            while (rightStartPoint > leftStartPoint && !vowels.Contains(word[rightStartPoint]))
+            while(startFromRight > startFromLeft && !vowels.Contains(word[startFromRight]))
             {
-                rightStartPoint--;
+                startFromRight--;
             }
-
-            (word[rightStartPoint], word[leftStartPoint]) = (word[leftStartPoint], word[rightStartPoint]);
-            leftStartPoint++;
-            rightStartPoint--;
+            char cc = word[startFromLeft];
+            char dd = word[startFromRight];
+            word[startFromLeft] = dd;
+            word[startFromRight] = cc;
+            
+            startFromLeft++;
+            startFromRight--;
         }
-
         return new string(word);
     }
 
-    public static bool CanPlaceFlowers(int[] flowerbed, int n)
+    public static bool CanPlaceFlowersV1(int[] flowerbed, int n)
     {
         for (int i = 0; i < flowerbed.Length; i++)
         {
@@ -1954,37 +2052,52 @@ public class Solution
         }
         return bools;
     }
-    public static string GcdOfStrings(string str1, string str2)
+    public static string GcdOfStringsv1()
     {
+        string str1 = "ABCABCABCABC", str2 = "ABC";
+       if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str1))
+        {
+            return "";
+        }
         if (str1 + str2 != str2 + str1)
         {
             return "";
         }
-        int firstStringLength = str1.Length;
-        int secondStringLength = str2.Length;
-        while (secondStringLength != 0)
+        int leftString = str1.Length;
+        int rightString = str2.Length;
+        while (rightString != 0)
         {
-            int temp = secondStringLength;
-            secondStringLength = firstStringLength % secondStringLength;
-            firstStringLength = temp;
+            int right = rightString;
+            rightString = leftString % rightString;
+            leftString = right;
         }
-        return str1.Substring(0, firstStringLength);
+        return str1[..leftString];
     }
 
-    public static string MergeAlternately(string word1, string word2)
+    public static string MergeAlternately()
     {
-        var result = new StringBuilder(word1.Length + word2.Length);
-        int i = 0;
+        string word1 = "abc",  word2 = "pqrss";
+        string result = "";
+       
+        int maxLength = Math.Max(word1.Length, word2.Length);
 
-        while (i < word1.Length || i < word2.Length)
+        for (int i = 0; i < maxLength; i++)
         {
-            if (i < word1.Length) result.Append(word1[i]);
-            if (i < word2.Length) result.Append(word2[i]);
-            i++;
-        }
+            if (i < word1.Length)
+            {
+                result += word1[i];
+            }
+            if (i < word2.Length)
+            {
+                result += word2[i];
+            }
 
-        return result.ToString();
+        }
+        return result;
+
     }
+
+
    
     public static int[] TwoSum(int[] nums, int target)
     {
